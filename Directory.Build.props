@@ -1,0 +1,26 @@
+<Project>
+	
+	<PropertyGroup>
+		<Product>RhinoPackager</Product>
+		<Title>Rhino Packager</Title>		
+		<Version>1.0.0</Version>
+		<Authors>visose</Authors>
+		<Description>Package and publish Rhino and Grasshopper plugins.</Description>		
+		<Copyright>Copyright (c) 2021 $(Authors)</Copyright>
+		<PackageTags>Rhino;Grasshopper;Package;Build;Yak</PackageTags>
+		<Company>$(Authors)</Company>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>	
+		<PackageProjectUrl>https://github.com/visose/rhinopackager</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/visose/RhinoPackager.git</RepositoryUrl>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<LangVersion>latest</LangVersion>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<ArtifactsDir>..\..\artifacts\</ArtifactsDir>
+		<OutputPath>$(ArtifactsDir)bin\$(MSBuildProjectName)</OutputPath>
+		<BaseIntermediateOutputPath>$(ArtifactsDir)obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
+	</PropertyGroup>
+
+</Project>
