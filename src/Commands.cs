@@ -29,14 +29,21 @@ class Commands
             Credentials = new Credentials(GetSecret("GITHUB_TOKEN"))
         };
 
-        var latest = await client.Repository.Release.GetLatest(settings.GithubOwner, settings.GithubRepo);
-
-        if (latest.TagName == version)
+        try
         {
-            Log($"Version number {version} not updated, nothing else to do.");
-            return -1;
-        }
+            var latest = await client.Repository.Release.GetLatest(settings.GithubOwner, settings.GithubRepo);
 
+            if (latest.TagName == version)
+            {
+                Log($"Version number {version} not updated, nothing else to do.");
+                return -1;
+            }
+        }
+        catch (NotFoundException)
+        {
+            Log($"No releases found in this repo.");
+        }
+        
         return 0;
     }
 

@@ -61,7 +61,7 @@ class Manifest
         if (notes is null)
             return description.ToString();
 
-       // description.AppendLine();
+        description.AppendLine();
         description.AppendLine($"Changes in {version}:");
 
         foreach (var change in notes.Changes)
