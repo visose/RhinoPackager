@@ -34,12 +34,8 @@ class Manifest
 
     [YamlMember(ScalarStyle = ScalarStyle.Literal)]
     public string Description { get; private set; }
-
-    [YamlMember(ScalarStyle = ScalarStyle.DoubleQuoted)]
     public string Url { get; private set; }
     public string[] Keywords { get; private set; }
-
-    [YamlMember(ScalarStyle = ScalarStyle.DoubleQuoted)]
     public string IconUrl { get; private set; }
 
     private Manifest()
@@ -50,8 +46,8 @@ class Manifest
         Version = GetVersion();
         Authors = props.GetList("Authors");
         Description = GetDescription(props, Version);
-        Url = props.GetItem("Url");
-        Keywords = props.GetList("Tags");
+        Url = props.GetItem("PackageProjectUrl");
+        Keywords = props.GetList("PackageTags");
         IconUrl = props.GetItem("IconUrl");
     }
 
@@ -65,7 +61,7 @@ class Manifest
         if (notes is null)
             return description.ToString();
 
-        description.AppendLine();
+       // description.AppendLine();
         description.AppendLine($"Changes in {version}:");
 
         foreach (var change in notes.Changes)
