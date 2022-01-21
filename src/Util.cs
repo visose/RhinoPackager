@@ -70,12 +70,8 @@ static class Util
             return yakPath;
 
         var http = new HttpClient();
-        var response = await http.GetAsync($"http://files.mcneel.com/yak/tools/latest/yak.exe");
-        response.EnsureSuccessStatusCode();
-        await using var ms = await response.Content.ReadAsStreamAsync();
-        await using var fs = File.Create(yakPath);
-        ms.Seek(0, SeekOrigin.Begin);
-        ms.CopyTo(fs);
+        var bytes = await http.GetByteArrayAsync($"http://files.mcneel.com/yak/tools/latest/yak.exe");
+        await File.WriteAllBytesAsync(yakPath, bytes);
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             Run("chmod", $"+x {yakPath}");
