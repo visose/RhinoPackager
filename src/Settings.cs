@@ -21,4 +21,5 @@ class Settings
     public string GithubRepo { get; set; } = default!;
     public string ReleaseFile { get; set; } = default!;
     public string ReleaseMessage { get; set; } = default!;
+    public string Tag { get; set; } = default!;
 }

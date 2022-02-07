@@ -7,7 +7,7 @@ namespace RhinoPackager;
 class Commands
 {
     public static int Test()
-    {        
+    {
         var project = Settings.Instance.TestProject;
 
         if (string.IsNullOrEmpty(project))
@@ -43,7 +43,7 @@ class Commands
         {
             Log($"No releases found in this repo.");
         }
-        
+
         return 0;
     }
 
@@ -81,7 +81,21 @@ class Commands
 
         // Build package
         string yak = await GetYakPathAsync();
-        return Run(yak, "build", packageFolder);
+        int result = Run(yak, "build", packageFolder);
+
+        if (result != 0)
+            return result;
+
+        // Rename tag
+
+        string packagePath = Directory.EnumerateFiles(packageFolder)
+            .Single(f => Path.GetExtension(f) == ".yak");
+
+        var newPackagePath = packagePath.Replace("any-any.yak", $"{settings.Tag}.yak");
+        File.Move(packagePath, newPackagePath);
+
+        Log($"File renamed to: {Path.GetFileName(newPackagePath)}");
+        return result;
     }
 
     public static async Task<int> PublishAsync()
