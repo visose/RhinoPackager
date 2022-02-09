@@ -59,10 +59,16 @@ static class Util
         if (value is not null)
             return value;
 
-        var json = File.ReadAllText("build/secrets.json");
-        var doc = JsonDocument.Parse(json);
-        var prop = doc.RootElement.GetProperty(key);
-        return prop.GetString().NotNull($"Secret {key} not found.");
+        var localSecrets = "build/secrets.json";
+
+        if (File.Exists(localSecrets))
+        {
+            var json = File.ReadAllText(localSecrets);
+            var doc = JsonDocument.Parse(json);
+            value = doc.RootElement.GetProperty(key).GetString();
+        }
+
+        return value ?? $"Secret {key} not found";
     }
 
     public static T NotNull<T>(this T? value, string? text = null)
