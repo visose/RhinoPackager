@@ -1,0 +1,23 @@
+name: Publish
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      commands:
+        description: 'Commands'
+        required: true
+        default: 'debug'
+
+jobs:
+  publish:
+    runs-on: windows-2022
+
+    steps:
+      - uses: actions/checkout@v2
+      - run: dotnet run --project "build/RhinoPackager.Build/RhinoPackager.Build.csproj" ${{ github.event.inputs.commands }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NUGET_KEY: ${{ secrets.NUGET_KEY }}

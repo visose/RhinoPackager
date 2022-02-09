@@ -3,15 +3,16 @@
 	<PropertyGroup>
 		<Product>RhinoPackager</Product>
 		<Title>Rhino Packager</Title>
-		<Version>1.0.4</Version>
+		<Version>1.0.5</Version>
 		<Authors>visose</Authors>
 		<Description>Package and publish Rhino and Grasshopper plugins.</Description>
-		<Copyright>Copyright (c) 2021 $(Authors)</Copyright>
+		<CurrentYear>$([System.DateTime]::Now.Year)</CurrentYear>
+		<Copyright>Copyright (c) 2021-$(CurrentYear) $(Authors)</Copyright>
 		<PackageTags>Rhino;Grasshopper;Package;Build;Yak</PackageTags>
 		<Company>$(Authors)</Company>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageProjectUrl>https://github.com/visose/rhinopackager</PackageProjectUrl>
-		<RepositoryUrl>https://github.com/visose/RhinoPackager.git</RepositoryUrl>
+		<RepositoryUrl>https://github.com/visose/rhinopackager.git</RepositoryUrl>
 	</PropertyGroup>
 
 	<PropertyGroup>

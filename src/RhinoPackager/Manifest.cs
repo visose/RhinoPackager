@@ -8,26 +8,6 @@ namespace RhinoPackager;
 
 class Manifest
 {
-    public static void CreateAndSave(string fileName)
-    {
-        var manifest = new Manifest();
-        var text = manifest.ToYaml();
-        File.WriteAllText(fileName, text);
-    }
-
-    public static string GetVersion()
-    {
-        var props = GetPropsElement();
-        return props.GetItem("Version");
-    }
-
-    static XElement GetPropsElement()
-    {
-        var doc = XDocument.Load("Directory.Build.props");
-        XElement props = (doc.Root?.Descendants().First()).NotNull();
-        return props;
-    }
-
     public string Name { get; private set; }
     public string Version { get; private set; }
     public string[] Authors { get; private set; }
@@ -38,12 +18,12 @@ class Manifest
     public string[] Keywords { get; private set; }
     public string IconUrl { get; private set; }
 
-    private Manifest()
+    public Manifest(string propsFile)
     {
-        var props = GetPropsElement();
+        var props = Props.GetPropsElement(propsFile);
 
         Name = props.GetItem("Product");
-        Version = GetVersion();
+        Version = Props.GetVersion();
         Authors = props.GetList("Authors");
         Description = GetDescription(props, Version);
         Url = props.GetItem("PackageProjectUrl");
@@ -51,25 +31,12 @@ class Manifest
         IconUrl = props.GetItem("IconUrl");
     }
 
-    string GetDescription(XElement props, string version)
+    public void Save(string saveFolder)
     {
-        var description = new StringBuilder();
-        description.AppendLine(props.GetItem("Description"));
-        var notes = Release.GetReleaseNotes()
-            .FirstOrDefault(n => n.Version == version);
-
-        if (notes is null)
-            return description.ToString();
-
-        description.AppendLine();
-        description.AppendLine($"Changes in {version}:");
-
-        foreach (var change in notes.Changes)
-            description.AppendLine($" - {change}");
-
-        return description.ToString();
+        var text = ToYaml();
+        var file = Path.Combine(saveFolder, "manifest.yml");
+        File.WriteAllText(file, text);
     }
-
     string ToYaml()
     {
         var serializer = new SerializerBuilder()
@@ -78,5 +45,22 @@ class Manifest
             .Build();
 
         return serializer.Serialize(this);
+    }
+
+    static string GetDescription(XElement props, string version)
+    {
+        var description = new StringBuilder();
+        description.AppendLine(props.GetItem("Description"));
+
+        string releaseFile = props.GetItem("ReleaseNotes");
+        var notes = ReleaseNotes.GetReleaseNotes(releaseFile, version);
+
+        if (notes is null)
+            return description.ToString();
+
+        description.AppendLine();
+        description.Append(notes);
+
+        return description.ToString();
     }
 }

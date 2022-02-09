@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
 		<AssemblyTitle>$(Product)</AssemblyTitle>
-		<PackageId>$(Product)</PackageId>
+		<PackageId>RhinoPackager</PackageId>
 	</PropertyGroup>
 
 	<ItemGroup>
