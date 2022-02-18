@@ -8,14 +8,14 @@ public class Yak : ICommand
     readonly Manifest _manifest;
     readonly string _sourceFolder;
     readonly string[] _files;
-    readonly string _tag;
+    readonly string[] _tags;
 
-    public Yak(string propsFile, string sourceFolder, string[] files, string tag)
+    public Yak(string propsFile, string sourceFolder, string[] files, string[] tags)
     {
         _manifest = new Manifest(propsFile);
         _sourceFolder = sourceFolder;
         _files = files;
-        _tag = tag;
+        _tags = tags;
     }
 
     public async Task<int> RunAsync(bool publish)
@@ -58,33 +58,41 @@ public class Yak : ICommand
         if (result != 0)
             return result;
 
-        // Rename tag
-
+        // Multiple versions
         var packagePath = Directory.EnumerateFiles(folder, "*.yak").Single();
-        var newPackagePath = Path.Combine(folder, GetPackageFileName(_tag));
 
-        if (packagePath.Equals(newPackagePath))
-            return 0;
+        foreach (var tag in _tags)
+        {
+            var newPackagePath = Path.Combine(folder, GetPackageFileName(tag));
+            File.Copy(packagePath, newPackagePath);
+            Log($"File copied to: {Path.GetFileName(newPackagePath)}");
+        }
 
-        File.Move(packagePath, newPackagePath);
-
-        Log($"File renamed to: {Path.GetFileName(newPackagePath)}");
+        File.Delete(packagePath);
         return result;
     }
 
     async Task<int> PublishAsync(bool publish)
     {
         string yak = await GetYakPathAsync();
-        var packageFile = GetPackageFileName(_tag);
         var folder = GetFolder();
 
         if (!publish)
         {
-            Log("Skipping publishing Yak package...");
+            Log("Skipping publishing Yak packages...");
             return 0;
         }
 
-        return Run(yak, $"push {packageFile}", folder);
+        foreach(var tag in _tags)
+        {
+            var packageFile = GetPackageFileName(tag);
+            var result = Run(yak, $"push {packageFile}", folder);
+
+            if (result != 0)
+                return result;
+        }
+
+        return 0;
     }
 
     static async Task<string> GetYakPathAsync()
@@ -110,6 +118,8 @@ public class Yak : ICommand
         return yakPath;
     }
 
-    string GetPackageFileName(string tag) => $"{_manifest.Name}-{_manifest.Version}-{tag}.yak".ToLowerInvariant();
+    string GetPackageFileName(string tag) => 
+        $"{_manifest.Name}-{_manifest.Version}-{tag}.yak".ToLowerInvariant();
+
     string GetFolder() => Path.Combine("artifacts", "Yak", _manifest.Name);
 }
