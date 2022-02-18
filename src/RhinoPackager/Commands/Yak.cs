@@ -64,11 +64,14 @@ public class Yak : ICommand
         foreach (var tag in _tags)
         {
             var newPackagePath = Path.Combine(folder, GetPackageFileName(tag));
+
+            if (packagePath.Equals(newPackagePath, StringComparison.OrdinalIgnoreCase))
+                continue;
+
             File.Copy(packagePath, newPackagePath);
             Log($"File copied to: {Path.GetFileName(newPackagePath)}");
         }
 
-        File.Delete(packagePath);
         return result;
     }
 
