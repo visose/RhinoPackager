@@ -1,21 +1,10 @@
 .DS_Store
-nupkg/
 secrets*
 
-# Build results
+# Artifacts
 artifacts/
 
-# Visual Studio Code
-.vscode
-
-# Rider
-.idea
-
-# Visual Studio
+# Editors
 .vs/
-
-# User-specific files
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
+.idea/
+*.sln

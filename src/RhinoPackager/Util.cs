@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace RhinoPackager;
 
-static class Util
+public static class Util
 {
     public static void Log(string? text)
     {

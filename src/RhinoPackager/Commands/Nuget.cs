@@ -4,12 +4,14 @@ namespace RhinoPackager.Commands;
 
 public class Nuget : ICommand
 {
+    readonly Props _props;
     readonly string _project;
     readonly string? _targets;
     readonly string? _certPath;
 
-    public Nuget(string project, string? targets = null, string? certPath = null)
+    public Nuget(Props props, string project, string? targets = null, string? certPath = null)
     {
+        _props = props;
         _project = project;
         _targets = targets;
         _certPath = certPath;
@@ -75,8 +77,10 @@ public class Nuget : ICommand
 
     string GetPackageFileName()
     {
-        var name = Props.GetPropsElement(_project).GetItem("PackageId");
-        var version = Props.GetVersion();
+        var projectProps = new Props(_project);
+        var name = projectProps.Get("PackageId");
+
+        var version = _props.GetVersion();
         return $"{name}.{version}.nupkg";
     }
 

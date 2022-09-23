@@ -2,24 +2,28 @@
 
 namespace RhinoPackager;
 
-static class Props
+public class Props
 {
-    public static string GetVersion()
+    readonly XElement _element;
+
+    public Props(string propsFile = "Directory.Build.props")
     {
-        var props = GetPropsElement("Directory.Build.props");
-        return props.GetItem("Version");
+        _element = GetPropsElement(propsFile);
     }
 
-    public static XElement GetPropsElement(string propsFile)
+    public string GetVersion() => Get("Version");
+    public string GetName() => Get("Product");
+
+    public string Get(string name)
+        => (_element.Element(XName.Get(name))?.Value).NotNull();
+
+    public string[] GetList(string name) =>
+        Get(name).Split(';', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+
+    static XElement GetPropsElement(string propsFile)
     {
         var doc = XDocument.Load(propsFile);
         XElement props = (doc.Root?.Descendants().First()).NotNull();
         return props;
     }
-
-    public static string GetItem(this XElement element, string name) =>
-    (element.Element(XName.Get(name))?.Value).NotNull();
-
-    public static string[] GetList(this XElement element, string name) =>
-        element.GetItem(name).Split(';', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
 }

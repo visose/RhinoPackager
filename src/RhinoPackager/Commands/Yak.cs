@@ -5,17 +5,21 @@ namespace RhinoPackager.Commands;
 
 public class Yak : ICommand
 {
-    readonly Manifest _manifest;
+    public const string Win7Tag = "rh7_0-win";
+
+    readonly Props _props;
     readonly string _sourceFolder;
     readonly string[] _files;
     readonly string[] _tags;
+    readonly bool _publish;
 
-    public Yak(string propsFile, string sourceFolder, string[] files, string[] tags)
+    public Yak(Props props, string sourceFolder, string[] files, string[] tags, bool publish = true)
     {
-        _manifest = new Manifest(propsFile);
+        _props = props;
         _sourceFolder = sourceFolder;
         _files = files;
         _tags = tags;
+        _publish = publish;
     }
 
     public async Task<int> RunAsync(bool publish)
@@ -25,13 +29,16 @@ public class Yak : ICommand
         if (result != 0)
             return result;
 
+        if (!_publish)
+            return result;
+
         result = await PublishAsync(publish);
         return result;
     }
 
     async Task<int> PackageAsync()
     {
-        var folder = GetFolder();
+        var folder = Path.Combine(GetFolder());
 
         // Package folder
         if (Directory.Exists(folder))
@@ -49,7 +56,8 @@ public class Yak : ICommand
         }
 
         // Save manifest
-        _manifest.Save(folder);
+        var manifest = new Manifest(_props);
+        manifest.Save(folder);
 
         // Build package
         string yak = await GetYakPathAsync();
@@ -63,7 +71,7 @@ public class Yak : ICommand
 
         foreach (var tag in _tags)
         {
-            var newPackagePath = Path.Combine(folder, GetPackageFileName(tag));
+            var newPackagePath = Path.Combine(folder, GetPackageFileName(_props, tag));
 
             if (packagePath.Equals(newPackagePath, StringComparison.OrdinalIgnoreCase))
                 continue;
@@ -86,9 +94,9 @@ public class Yak : ICommand
             return 0;
         }
 
-        foreach(var tag in _tags)
+        foreach (var tag in _tags)
         {
-            var packageFile = GetPackageFileName(tag);
+            var packageFile = GetPackageFileName(_props, tag);
             var result = Run(yak, $"push {packageFile}", folder);
 
             if (result != 0)
@@ -121,8 +129,8 @@ public class Yak : ICommand
         return yakPath;
     }
 
-    string GetPackageFileName(string tag) => 
-        $"{_manifest.Name}-{_manifest.Version}-{tag}.yak".ToLowerInvariant();
+    public static string GetPackageFileName(Props props, string tag) =>
+        $"{props.GetName()}-{props.GetVersion()}-{tag}.yak".ToLowerInvariant();
 
-    string GetFolder() => Path.Combine("artifacts", "Yak", _manifest.Name);
+    string GetFolder() => Path.Combine("artifacts", "yak");
 }

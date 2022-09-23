@@ -5,12 +5,14 @@ namespace RhinoPackager.Commands;
 
 public class Release : ICommand
 {
+    readonly Props _props;
     readonly Github _github;
     readonly string? _file;
     readonly string? _message;
 
-    public Release(Github github, string? file = null, string? message = null)
+    public Release(Props props, Github github, string? file = null, string? message = null)
     {
+        _props = props;
         _github = github;
         _file = file;
         _message = message;
@@ -18,8 +20,8 @@ public class Release : ICommand
 
     public async Task<int> RunAsync(bool publish)
     {
-        string version = Props.GetVersion();
-        var body = new StringBuilder();
+        string version = _props.GetVersion();
+        StringBuilder body = new();
 
         if (_file is not null)
         {

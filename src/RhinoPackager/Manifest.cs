@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using System.Xml.Linq;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -16,19 +15,17 @@ class Manifest
     public string Description { get; private set; }
     public string Url { get; private set; }
     public string[] Keywords { get; private set; }
-    public string IconUrl { get; private set; }
+    public string Icon { get; private set; }
 
-    public Manifest(string propsFile)
+    public Manifest(Props props)
     {
-        var props = Props.GetPropsElement(propsFile);
-
-        Name = props.GetItem("Product");
-        Version = Props.GetVersion();
+        Name = props.Get("Product");
+        Version = props.GetVersion();
         Authors = props.GetList("Authors");
         Description = GetDescription(props, Version);
-        Url = props.GetItem("PackageProjectUrl");
+        Url = props.Get("PackageProjectUrl");
         Keywords = props.GetList("PackageTags");
-        IconUrl = props.GetItem("IconUrl");
+        Icon = props.Get("Icon");
     }
 
     public void Save(string saveFolder)
@@ -47,12 +44,12 @@ class Manifest
         return serializer.Serialize(this);
     }
 
-    static string GetDescription(XElement props, string version)
+    static string GetDescription(Props props, string version)
     {
         var description = new StringBuilder();
-        description.AppendLine(props.GetItem("Description"));
+        description.AppendLine(props.Get("Description"));
 
-        string releaseFile = props.GetItem("ReleaseNotes");
+        string releaseFile = props.Get("ReleaseNotes");
         var notes = ReleaseNotes.GetReleaseNotes(releaseFile, version);
 
         if (notes is null)

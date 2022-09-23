@@ -40,7 +40,7 @@ public class Github
         {
             Name = version,
             Body = body,
-            Prerelease = false
+            Prerelease = false,
         };
 
         return await _client.Repository.Release.Create(_owner, _repo, release);

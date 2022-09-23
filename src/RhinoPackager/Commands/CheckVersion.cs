@@ -4,11 +4,13 @@ namespace RhinoPackager.Commands;
 
 public class CheckVersion : ICommand
 {
+    readonly Props _props;
     readonly Github _github;
 
-    public CheckVersion(Github github)
+    public CheckVersion(Props props, Github github)
     {
         _github = github;
+        _props = props;
     }
 
     public async Task<int> RunAsync(bool publish)
@@ -20,7 +22,7 @@ public class CheckVersion : ICommand
         }
 
         var publishedVersion = await _github.GetLatestVersionAsync();
-        string version = Props.GetVersion();
+        string version = _props.GetVersion();
 
         if (publishedVersion == version)
         {
