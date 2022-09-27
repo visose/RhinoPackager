@@ -1,4 +1,4 @@
-﻿using YamlDotNet.Serialization;
+using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
 namespace RhinoPackager;
@@ -11,7 +11,7 @@ record ReleaseItem
 
 static class ReleaseNotes
 {
-    public static string? GetReleaseNotes(string releaseFile, string version)
+    public static string? GetReleaseNotes(string? releaseFile, string version)
     {
         var notes = GetAllReleaseNotes(releaseFile)
             .FirstOrDefault(n => n.Version == version);
@@ -28,8 +28,7 @@ static class ReleaseNotes
         return text.ToString();
     }
 
-
-    static List<ReleaseItem> GetAllReleaseNotes(string releaseFile)
+    static List<ReleaseItem> GetAllReleaseNotes(string? releaseFile)
     {
         if (!File.Exists(releaseFile))
             return new List<ReleaseItem>(0);

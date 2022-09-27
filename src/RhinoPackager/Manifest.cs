@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -49,7 +49,7 @@ class Manifest
         var description = new StringBuilder();
         description.AppendLine(props.Get("Description"));
 
-        string releaseFile = props.Get("ReleaseNotes");
+        var releaseFile = props.GetOrDefault("ReleaseNotes");
         var notes = ReleaseNotes.GetReleaseNotes(releaseFile, version);
 
         if (notes is null)

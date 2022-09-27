@@ -1,4 +1,4 @@
-﻿using System.Xml.Linq;
+using System.Xml.Linq;
 
 namespace RhinoPackager;
 
@@ -15,7 +15,10 @@ public class Props
     public string GetName() => Get("Product");
 
     public string Get(string name)
-        => (_element.Element(XName.Get(name))?.Value).NotNull();
+        => GetOrDefault(name).NotNull(name);
+
+    public string? GetOrDefault(string name)
+        => _element.Element(XName.Get(name))?.Value;
 
     public string[] GetList(string name) =>
         Get(name).Split(';', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);

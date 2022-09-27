@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 using static RhinoPackager.Util;
 
 namespace RhinoPackager.Commands;
@@ -132,5 +132,5 @@ public class Yak : ICommand
     public static string GetPackageFileName(Props props, string tag) =>
         $"{props.GetName()}-{props.GetVersion()}-{tag}.yak".ToLowerInvariant();
 
-    string GetFolder() => Path.Combine("artifacts", "yak");
+    static string GetFolder() => Path.Combine("artifacts", "yak");
 }
