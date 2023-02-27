@@ -1,14 +1,11 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Text.Json;
 
 namespace RhinoPackager;
 
 public static class Util
 {
-    public static void Log(string? text)
-    {
-        Console.WriteLine(text);
-    }
+    public static void Log(string? text) => Console.WriteLine(text);
 
     public static int RunDotnet(string target, string args)
     {
@@ -59,7 +56,7 @@ public static class Util
         if (value is not null)
             return value;
 
-        var localSecrets = "build/secrets.json";
+        var localSecrets = "secrets.json";
 
         if (File.Exists(localSecrets))
         {
@@ -71,8 +68,6 @@ public static class Util
         return value ?? $"Secret {key} not found";
     }
 
-    public static T NotNull<T>(this T? value, string? text = null)
-    {
-        return value ?? throw new ArgumentNullException(text ?? nameof(value));
-    }
+    public static T NotNull<T>(this T? value, string? text = null) =>
+        value ?? throw new ArgumentNullException(text ?? nameof(value));
 }

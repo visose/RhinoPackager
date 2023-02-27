@@ -1,4 +1,4 @@
-﻿using static RhinoPackager.Util;
+using static RhinoPackager.Util;
 
 namespace RhinoPackager.Commands;
 
@@ -6,10 +6,7 @@ public class Build : ICommand
 {
     readonly string _buildProject;
 
-    public Build(string buildProject)
-    {
-        _buildProject = buildProject;
-    }
+    public Build(string buildProject) => _buildProject = buildProject;
 
     public Task<int> RunAsync(bool publish)
     {

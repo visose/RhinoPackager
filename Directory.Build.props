@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Product>RhinoPackager</Product>
     <Title>Rhino Packager</Title>
-    <Version>1.1.1</Version>
+    <Version>1.2.1</Version>
     <Authors>visose</Authors>
     <Description>Package and publish Rhino and Grasshopper plugins.</Description>
     <CurrentYear>$([System.DateTime]::Now.Year)</CurrentYear>
@@ -19,7 +19,8 @@
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <ArtifactsDir>$(MSBuildThisFileDirectory)artifacts\</ArtifactsDir>
+    <RootDir>$(MSBuildThisFileDirectory)</RootDir>
+    <ArtifactsDir>$(RootDir)artifacts\</ArtifactsDir>
     <OutputPath>$(ArtifactsDir)bin\$(MSBuildProjectName)</OutputPath>
     <BaseIntermediateOutputPath>$(ArtifactsDir)obj\$(MSBuildProjectName)</BaseIntermediateOutputPath>
   </PropertyGroup>

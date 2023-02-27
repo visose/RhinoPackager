@@ -6,10 +6,8 @@ public class Props
 {
     readonly XElement _element;
 
-    public Props(string propsFile = "Directory.Build.props")
-    {
+    public Props(string propsFile = "Directory.Build.props") =>
         _element = GetPropsElement(propsFile);
-    }
 
     public string GetVersion() => Get("Version");
     public string GetName() => Get("Product");

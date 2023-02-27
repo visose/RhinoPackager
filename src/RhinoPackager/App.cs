@@ -1,10 +1,10 @@
-﻿using static RhinoPackager.Util;
+using static RhinoPackager.Util;
 
 namespace RhinoPackager;
 
 public class App
 {
-    readonly bool _publish = false;
+    readonly bool _publish;
     readonly List<ICommand> _commands = new();
 
     public static App Create(string[] args)
@@ -15,13 +15,14 @@ public class App
 
     private App(bool publish) => _publish = publish;
 
-    public void Add(IEnumerable<ICommand> commands)
-    {
+    public void Add(params ICommand[] commands) =>
         _commands.AddRange(commands);
-    }
 
     public async Task<int> RunAsync()
     {
+        if (!_publish)
+            Log("Publishing disabled.");
+
         foreach (var command in _commands)
         {
             string name = command.GetType().Name;

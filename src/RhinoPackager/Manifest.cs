@@ -46,7 +46,7 @@ class Manifest
 
     static string GetDescription(Props props, string version)
     {
-        var description = new StringBuilder();
+        StringBuilder description = new();
         description.AppendLine(props.Get("Description"));
 
         var releaseFile = props.GetOrDefault("ReleaseNotes");

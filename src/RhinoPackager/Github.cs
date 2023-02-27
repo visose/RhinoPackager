@@ -1,4 +1,4 @@
-﻿using Octokit;
+using Octokit;
 using static RhinoPackager.Util;
 
 namespace RhinoPackager;
@@ -14,9 +14,9 @@ public class Github
         _owner = owner;
         _repo = repo;
 
-        _client = new GitHubClient(new ProductHeaderValue(_owner))
+        _client = new(new ProductHeaderValue(_owner))
         {
-            Credentials = new Credentials(GetSecret("GITHUB_TOKEN"))
+            Credentials = new(GetSecret("GITHUB_TOKEN"))
         };
     }
 
@@ -36,7 +36,7 @@ public class Github
 
     public async Task<Release> AddReleaseAsync(string version, string body)
     {
-        var release = new NewRelease(version)
+        NewRelease release = new(version)
         {
             Name = version,
             Body = body,
@@ -44,5 +44,17 @@ public class Github
         };
 
         return await _client.Repository.Release.Create(_owner, _repo, release);
+    }
+
+    public async Task AddReleaseAssetsAsync(Release release, string[] files)
+    {
+        await Parallel.ForEachAsync(files, async (file, cancel) =>
+        {
+            var name = Path.GetFileName(file);
+            var mime = "application/octet-stream";
+            using var stream = File.OpenRead(file);
+            ReleaseAssetUpload uploadData = new(name, mime, stream, null);
+            await _client.Repository.Release.UploadAsset(release, uploadData, cancel);
+        });
     }
 }

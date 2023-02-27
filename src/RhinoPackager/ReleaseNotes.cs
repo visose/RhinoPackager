@@ -1,3 +1,4 @@
+using System.Text;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -19,7 +20,7 @@ static class ReleaseNotes
         if (notes is null)
             return null;
 
-        var text = new System.Text.StringBuilder();
+        StringBuilder text = new();
         text.AppendLine($"Changes in {version}:");
 
         foreach (var change in notes.Changes)
@@ -31,7 +32,7 @@ static class ReleaseNotes
     static List<ReleaseItem> GetAllReleaseNotes(string? releaseFile)
     {
         if (!File.Exists(releaseFile))
-            return new List<ReleaseItem>(0);
+            return new(0);
 
         var text = File.ReadAllText(releaseFile);
 
@@ -41,6 +42,4 @@ static class ReleaseNotes
 
         return deserializer.Deserialize<List<ReleaseItem>>(text);
     }
-
-
 }
