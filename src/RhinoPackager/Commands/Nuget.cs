@@ -1,4 +1,4 @@
-﻿using static RhinoPackager.Util;
+using static RhinoPackager.Util;
 
 namespace RhinoPackager.Commands;
 
@@ -77,7 +77,7 @@ public class Nuget : ICommand
 
     string GetPackageFileName()
     {
-        var projectProps = new Props(_project);
+        Props projectProps = new(_project);
         var name = projectProps.Get("PackageId");
 
         var version = _props.GetVersion();

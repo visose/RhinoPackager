@@ -7,7 +7,7 @@ public static class Util
 {
     public static void Log(string? text) => Console.WriteLine(text);
 
-    public static int RunDotnet(string target, string args)
+    public static int RunDotnet(string target, params string[] args)
     {
         var ci = Environment.GetEnvironmentVariable("CI");
 
@@ -15,14 +15,14 @@ public static class Util
             ? "-p:ContinuousIntegrationBuild=\"true\""
             : null;
 
-        return Run("dotnet", $"{target} -c Release {ciArg} {args}");
+        return Run("dotnet", $"{target} {string.Join(" ", args)} -c Release {ciArg}");
     }
 
     public static int Run(string file, string args, string? setCurrentDir = null)
     {
         var currentDir = setCurrentDir ?? Directory.GetCurrentDirectory();
 
-        var startInfo = new ProcessStartInfo
+        ProcessStartInfo startInfo = new()
         {
             FileName = file,
             Arguments = args,
@@ -34,7 +34,7 @@ public static class Util
             CreateNoWindow = true
         };
 
-        using var process = new Process
+        using Process process = new()
         {
             StartInfo = startInfo
         };
@@ -65,7 +65,7 @@ public static class Util
             value = doc.RootElement.GetProperty(key).GetString();
         }
 
-        return value ?? $"Secret {key} not found";
+        return value ?? $"Environment variable {key} not found";
     }
 
     public static T NotNull<T>(this T? value, string? text = null) =>

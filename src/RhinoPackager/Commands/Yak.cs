@@ -56,7 +56,7 @@ public class Yak : ICommand
         }
 
         // Save manifest
-        var manifest = new Manifest(_props);
+        Manifest manifest = new(_props);
         manifest.Save(folder);
 
         // Build package
@@ -119,7 +119,7 @@ public class Yak : ICommand
         if (File.Exists(yakPath))
             return yakPath;
 
-        var http = new HttpClient();
+        using HttpClient http = new();
         var bytes = await http.GetByteArrayAsync($"http://files.mcneel.com/yak/tools/latest/yak.exe");
         await File.WriteAllBytesAsync(yakPath, bytes);
 
