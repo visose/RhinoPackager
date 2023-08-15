@@ -1,4 +1,4 @@
-﻿using static RhinoPackager.Util;
+using static RhinoPackager.Util;
 
 namespace RhinoPackager.Commands;
 
@@ -21,10 +21,10 @@ public class CheckVersion : ICommand
             return 0;
         }
 
-        var publishedVersion = await _github.GetLatestVersionAsync();
         string version = _props.GetVersion();
+        var versionExists = await _github.TagExistsAsync(version);
 
-        if (publishedVersion == version)
+        if (versionExists)
         {
             Log($"Version number {version} not updated, nothing else to do.");
             return -1;

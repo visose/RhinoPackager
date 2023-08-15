@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Product>RhinoPackager</Product>
     <Title>Rhino Packager</Title>
-    <Version>1.3.0</Version>
+    <Version>1.4.0</Version>
     <Authors>visose</Authors>
     <Description>Package and publish Rhino and Grasshopper plugins.</Description>
     <CurrentYear>$([System.DateTime]::Now.Year)</CurrentYear>

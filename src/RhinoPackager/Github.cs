@@ -20,27 +20,22 @@ public class Github
         };
     }
 
-    public async Task<string?> GetLatestVersionAsync()
+    public async Task<bool> TagExistsAsync(string tag)
     {
-        try
-        {
-            var latest = await _client.Repository.Release.GetLatest(_owner, _repo);
-            return latest.TagName;
-        }
-        catch (NotFoundException)
-        {
-            Log($"No non-preview releases found in this repo.");
-            return null;
-        }
+        var tags = await _client.Repository.GetAllTags(_owner, _repo);
+        return tags.Any(t => t.Name.Equals(tag, StringComparison.OrdinalIgnoreCase));
     }
 
     public async Task<Release> AddReleaseAsync(string version, string body)
     {
+        var preTags = new[] { "alpha", "beta" };
+        var isPrerelease = preTags.Any(t => version.Contains(t, StringComparison.OrdinalIgnoreCase));
+
         NewRelease release = new(version)
         {
             Name = version,
             Body = body,
-            Prerelease = false,
+            Prerelease = isPrerelease,
         };
 
         return await _client.Repository.Release.Create(_owner, _repo, release);

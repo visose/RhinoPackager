@@ -21,6 +21,14 @@ public class Props
     public string[] GetList(string name) =>
         Get(name).Split(';', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
 
+    public void Set(string key, string value)
+    {
+        var element = _element.Element(XName.Get(key))
+            ?? throw new($"Element {key} not found");
+
+        element.Value = value;
+    }
+
     static XElement GetPropsElement(string propsFile)
     {
         var doc = XDocument.Load(propsFile);
