@@ -52,6 +52,12 @@ public class Yak : ICommand
         {
             var source = Path.Combine(_sourceFolder, file);
             var destination = Path.Combine(folder, file);
+
+            var dir = Path.GetDirectoryName(destination);
+
+            if (!string.IsNullOrWhiteSpace(dir))
+                Directory.CreateDirectory(dir);
+
             File.Copy(source, destination, true);
         }
 
