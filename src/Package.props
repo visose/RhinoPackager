@@ -1,0 +1,17 @@
+﻿<Project>
+
+  <PropertyGroup>
+    <Product>RhinoPackager</Product>
+    <Title>Rhino Packager</Title>
+    <Version>1.5.0</Version>
+    <Authors>visose</Authors>
+    <Description>Package and publish Rhino and Grasshopper plugins.</Description>
+    <PackageTags>Rhino;Grasshopper;Package;Build;Yak</PackageTags>
+    <Company>$(Authors)</Company>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/visose/rhinopackager</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/visose/rhinopackager.git</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+</Project>

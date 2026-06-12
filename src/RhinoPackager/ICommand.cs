@@ -2,5 +2,5 @@
 
 public interface ICommand
 {
-    Task<int> RunAsync(bool publish);
+    Task Run(CommandContext context);
 }

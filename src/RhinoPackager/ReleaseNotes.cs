@@ -4,35 +4,50 @@ using YamlDotNet.Serialization.NamingConventions;
 
 namespace RhinoPackager;
 
-record ReleaseItem
+sealed record ReleaseItem
 {
-    public string Version { get; init; } = default!;
-    public List<string> Changes { get; init; } = default!;
+    public required string Version { get; init; }
+    public required List<string> Changes { get; init; }
 }
 
 static class ReleaseNotes
 {
     public static string? GetReleaseNotes(string? releaseFile, string version)
     {
-        var notes = GetAllReleaseNotes(releaseFile)
-            .FirstOrDefault(n => n.Version == version);
-
-        if (notes is null)
+        if (releaseFile is null)
             return null;
 
+        var matchingNotes = GetAllReleaseNotes(releaseFile)
+            .Where(note => note.Version == version)
+            .ToArray();
+
+        if (matchingNotes.Length == 0)
+            throw new InvalidOperationException($"Release notes for version '{version}' were not found in {releaseFile}.");
+
+        if (matchingNotes.Length > 1)
+            throw new InvalidOperationException($"Release notes for version '{version}' are duplicated in {releaseFile}.");
+
+        var notes = matchingNotes[0];
         StringBuilder text = new();
-        text.AppendLine($"Changes in {version}:");
+        _ = text
+            .Append("Changes in ")
+            .Append(version)
+            .AppendLine(":");
 
         foreach (var change in notes.Changes)
-            text.AppendLine($" - {change}");
+        {
+            _ = text
+                .Append(" - ")
+                .AppendLine(change);
+        }
 
         return text.ToString();
     }
 
-    static List<ReleaseItem> GetAllReleaseNotes(string? releaseFile)
+    static List<ReleaseItem> GetAllReleaseNotes(string releaseFile)
     {
         if (!File.Exists(releaseFile))
-            return new(0);
+            throw new FileNotFoundException($"Release notes file was not found: {releaseFile}", releaseFile);
 
         var text = File.ReadAllText(releaseFile);
 
@@ -40,6 +55,18 @@ static class ReleaseNotes
             .WithNamingConvention(CamelCaseNamingConvention.Instance)
             .Build();
 
-        return deserializer.Deserialize<List<ReleaseItem>>(text);
+        var notes = deserializer.Deserialize<List<ReleaseItem>>(text)
+            ?? throw new InvalidOperationException($"Release notes file is empty: {releaseFile}.");
+
+        foreach (var note in notes)
+        {
+            if (string.IsNullOrWhiteSpace(note.Version))
+                throw new InvalidOperationException($"Release notes file contains an item without a version: {releaseFile}.");
+
+            if (note.Changes is null)
+                throw new InvalidOperationException($"Release notes for version '{note.Version}' do not define changes: {releaseFile}.");
+        }
+
+        return notes;
     }
 }

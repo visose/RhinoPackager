@@ -1,24 +1,24 @@
-using static RhinoPackager.Util;
+﻿using static RhinoPackager.Util;
 
 namespace RhinoPackager.Commands;
 
-public class Build : ICommand
+public class Build(string project, string target = "publish", string[]? arguments = null) : ICommand
 {
-    readonly string _target;
-    readonly List<string> _args = new();
+    readonly string _project = string.IsNullOrWhiteSpace(project)
+        ? throw new ArgumentException("Project path cannot be empty.", nameof(project))
+        : project;
 
-    public Build(string buildProject, string target = "build", params string[] args)
+    readonly string _target = string.IsNullOrWhiteSpace(target)
+        ? throw new ArgumentException("Dotnet target cannot be empty.", nameof(target))
+        : target;
+
+    public Task Run(CommandContext context)
     {
-        _target = target;
+        List<string> dotnetArguments = [_target, _project];
+        AddDotnetDefaults(dotnetArguments, context);
 
-        _args.Add(buildProject);
-        _args.AddRange(args);
-    }
-
-    public Task<int> RunAsync(bool publish)
-    {
-        var result = RunDotnet(_target, _args.ToArray());
-        return Task.FromResult(result);
-        //var result = Run("dotnet", $"build -c Release {ciArg} {_buildProject}");
+        dotnetArguments.AddRange(arguments ?? []);
+        _ = ProcessRunner.Run("dotnet", dotnetArguments);
+        return Task.CompletedTask;
     }
 }

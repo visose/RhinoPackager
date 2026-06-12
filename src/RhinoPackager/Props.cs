@@ -1,38 +1,46 @@
-using System.Xml.Linq;
+﻿using System.Xml.Linq;
 
 namespace RhinoPackager;
 
-public class Props
+public class Props(string propsFile = "Directory.Build.props")
 {
-    readonly XElement _element;
-
-    public Props(string propsFile = "Directory.Build.props") =>
-        _element = GetPropsElement(propsFile);
+    readonly XDocument _document = XDocument.Load(propsFile);
+    readonly string _propsFile = propsFile;
 
     public string GetVersion() => Get("Version");
     public string GetName() => Get("Product");
 
     public string Get(string name)
-        => GetOrDefault(name).NotNull(name);
+    {
+        return GetOrDefault(name)
+            ?? throw new InvalidOperationException($"Property '{name}' was not found in {_propsFile}.");
+    }
 
     public string? GetOrDefault(string name)
-        => _element.Element(XName.Get(name))?.Value;
+    {
+        return GetProperty(name)?.Value;
+    }
 
     public string[] GetList(string name) =>
         Get(name).Split(';', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
 
     public void Set(string key, string value)
     {
-        var element = _element.Element(XName.Get(key))
-            ?? throw new($"Element {key} not found");
+        var element = GetProperty(key)
+            ?? throw new InvalidOperationException($"Property '{key}' was not found in {_propsFile}.");
 
         element.Value = value;
     }
 
-    static XElement GetPropsElement(string propsFile)
+    XElement? GetProperty(string name)
     {
-        var doc = XDocument.Load(propsFile);
-        XElement props = (doc.Root?.Descendants().First()).NotNull();
-        return props;
+        var root = _document.Root
+            ?? throw new InvalidOperationException($"Props file '{_propsFile}' does not have a root element.");
+
+        return root
+            .Elements()
+            .Where(element => element.Name.LocalName == "PropertyGroup")
+            .Elements()
+            .FirstOrDefault(element => element.Name.LocalName == name);
     }
 }

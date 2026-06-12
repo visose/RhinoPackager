@@ -1,40 +1,36 @@
-using static RhinoPackager.Util;
+﻿using static RhinoPackager.Util;
 
 namespace RhinoPackager;
 
 public class App
 {
-    readonly bool _publish;
-    readonly List<ICommand> _commands = new();
+    readonly AppOptions _options;
+    readonly List<ICommand> _commands = [];
 
     public static App Create(string[] args)
     {
-        var publish = !args.Any(a => a.Equals("debug", StringComparison.OrdinalIgnoreCase));
-        return new App(publish);
+        var options = AppOptions.Parse(args);
+        return new(options);
     }
 
-    private App(bool publish) => _publish = publish;
+    private App(AppOptions options) => _options = options;
 
     public void Add(params ICommand[] commands) =>
         _commands.AddRange(commands);
 
-    public async Task<int> RunAsync()
+    public async Task<int> Run()
     {
-        if (!_publish)
-            Log("Publishing disabled.");
+        CommandContext context = new(_options);
+
+        if (!_options.Publish)
+            Log("Publishing disabled. Use --publish to push packages and create releases.");
 
         foreach (var command in _commands)
         {
             string name = command.GetType().Name;
             Log($"Starting {name}...");
 
-            var result = await command.RunAsync(_publish);
-
-            if (result != 0)
-            {
-                Log($"Stopped at step: {name}");
-                return Math.Max(result, 0);
-            }
+            await command.Run(context);
         }
 
         Log("Finished with no errors.");

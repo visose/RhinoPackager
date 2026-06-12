@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="build\RhinoPackager.Build\RhinoPackager.Build.csproj" />
+  <Project Path="src\RhinoPackager\RhinoPackager.csproj" />
+</Solution>

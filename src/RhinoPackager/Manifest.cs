@@ -1,21 +1,21 @@
-using System.Text;
+﻿using System.Text;
 using YamlDotNet.Core;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
 namespace RhinoPackager;
 
-class Manifest
+sealed class Manifest
 {
-    public string Name { get; private set; }
-    public string Version { get; private set; }
-    public string[] Authors { get; private set; }
+    public string Name { get; }
+    public string Version { get; }
+    public string[] Authors { get; }
 
     [YamlMember(ScalarStyle = ScalarStyle.Literal)]
-    public string Description { get; private set; }
-    public string Url { get; private set; }
-    public string[] Keywords { get; private set; }
-    public string Icon { get; private set; }
+    public string Description { get; }
+    public string Url { get; }
+    public string[] Keywords { get; }
+    public string Icon { get; }
 
     public Manifest(Props props)
     {
@@ -25,7 +25,7 @@ class Manifest
         Description = GetDescription(props, Version);
         Url = props.Get("PackageProjectUrl");
         Keywords = props.GetList("PackageTags");
-        Icon = props.Get("Icon");
+        Icon = props.GetOrDefault("Icon") ?? props.Get("PackageIcon");
     }
 
     public void Save(string saveFolder)
@@ -34,6 +34,7 @@ class Manifest
         var file = Path.Combine(saveFolder, "manifest.yml");
         File.WriteAllText(file, text);
     }
+
     string ToYaml()
     {
         var serializer = new SerializerBuilder()
@@ -47,7 +48,7 @@ class Manifest
     static string GetDescription(Props props, string version)
     {
         StringBuilder description = new();
-        description.AppendLine(props.Get("Description"));
+        _ = description.AppendLine(props.Get("Description"));
 
         var releaseFile = props.GetOrDefault("ReleaseNotes");
         var notes = ReleaseNotes.GetReleaseNotes(releaseFile, version);
@@ -55,8 +56,8 @@ class Manifest
         if (notes is null)
             return description.ToString();
 
-        description.AppendLine();
-        description.Append(notes);
+        _ = description.AppendLine();
+        _ = description.Append(notes);
 
         return description.ToString();
     }

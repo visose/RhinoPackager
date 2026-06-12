@@ -1,10 +1,10 @@
-.DS_Store
-secrets*
+/artifacts/
 
-# Artifacts
-artifacts/
-
-# Editors
 .vs/
+.vscode/
 .idea/
-*.sln
+.DS_Store
+
+*.user
+secrets.json
+secrets.*.json

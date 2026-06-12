@@ -1,59 +1,30 @@
-using System.Diagnostics;
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace RhinoPackager;
 
 public static class Util
 {
-    public static void Log(string? text) => Console.WriteLine(text);
-
-    public static int RunDotnet(string target, params string[] args)
+    public static void Log(string? text)
     {
-        var ci = Environment.GetEnvironmentVariable("CI");
-
-        string? ciArg = ci == "true"
-            ? "-p:ContinuousIntegrationBuild=\"true\""
-            : null;
-
-        return Run("dotnet", $"{target} {string.Join(" ", args)} -c Release {ciArg}");
+        if (text is not null)
+            Console.WriteLine(text);
     }
 
-    public static int Run(string file, string args, string? setCurrentDir = null)
+    public static void AddDotnetDefaults(List<string> arguments, CommandContext context)
     {
-        var currentDir = setCurrentDir ?? Directory.GetCurrentDirectory();
+        arguments.Add("--configuration");
+        arguments.Add(context.Configuration);
+        arguments.Add("--nologo");
 
-        ProcessStartInfo startInfo = new()
-        {
-            FileName = file,
-            Arguments = args,
-            WorkingDirectory = currentDir,
-            RedirectStandardInput = true,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true
-        };
-
-        using Process process = new()
-        {
-            StartInfo = startInfo
-        };
-
-        process.OutputDataReceived += (o, e) => Log(e.Data);
-        process.ErrorDataReceived += (o, e) => Log(e.Data);
-        process.Start();
-        process.BeginErrorReadLine();
-        process.BeginOutputReadLine();
-        process.WaitForExit();
-
-        return process.ExitCode;
+        if (Environment.GetEnvironmentVariable("CI") == "true")
+            arguments.Add("-p:ContinuousIntegrationBuild=true");
     }
 
     public static string GetSecret(string key)
     {
         string? value = Environment.GetEnvironmentVariable(key);
 
-        if (value is not null)
+        if (!string.IsNullOrWhiteSpace(value))
             return value;
 
         var localSecrets = "secrets.json";
@@ -61,13 +32,17 @@ public static class Util
         if (File.Exists(localSecrets))
         {
             var json = File.ReadAllText(localSecrets);
-            var doc = JsonDocument.Parse(json);
-            value = doc.RootElement.GetProperty(key).GetString();
+            using var doc = JsonDocument.Parse(json);
+
+            if (doc.RootElement.TryGetProperty(key, out var property))
+            {
+                value = property.GetString();
+
+                if (!string.IsNullOrWhiteSpace(value))
+                    return value;
+            }
         }
 
-        return value ?? $"Environment variable {key} not found";
+        throw new InvalidOperationException($"Secret '{key}' was not found in the environment or secrets.json.");
     }
-
-    public static T NotNull<T>(this T? value, string? text = null) =>
-        value ?? throw new ArgumentNullException(text ?? nameof(value));
 }

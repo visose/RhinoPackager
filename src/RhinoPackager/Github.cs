@@ -1,33 +1,32 @@
-using Octokit;
+﻿using Octokit;
 using static RhinoPackager.Util;
 
 namespace RhinoPackager;
 
-public class Github
+public class Github(string owner, string repo)
 {
-    readonly string _owner;
-    readonly string _repo;
-    readonly GitHubClient _client;
+    readonly GitHubClient _client = new(new ProductHeaderValue(owner));
+    bool _authenticated;
 
-    public Github(string owner, string repo)
+    public async Task<bool> TagExists(string tag)
     {
-        _owner = owner;
-        _repo = repo;
+        Authenticate();
 
-        _client = new(new ProductHeaderValue(_owner))
+        try
         {
-            Credentials = new(GetSecret("GITHUB_TOKEN"))
-        };
+            _ = await _client.Git.Reference.Get(owner, repo, $"tags/{tag}");
+            return true;
+        }
+        catch (NotFoundException)
+        {
+            return false;
+        }
     }
 
-    public async Task<bool> TagExistsAsync(string tag)
+    public async Task<Release> AddRelease(string version, string body)
     {
-        var tags = await _client.Repository.GetAllTags(_owner, _repo);
-        return tags.Any(t => t.Name.Equals(tag, StringComparison.OrdinalIgnoreCase));
-    }
+        Authenticate();
 
-    public async Task<Release> AddReleaseAsync(string version, string body)
-    {
         var preTags = new[] { "alpha", "beta" };
         var isPrerelease = preTags.Any(t => version.Contains(t, StringComparison.OrdinalIgnoreCase));
 
@@ -38,18 +37,32 @@ public class Github
             Prerelease = isPrerelease,
         };
 
-        return await _client.Repository.Release.Create(_owner, _repo, release);
+        return await _client.Repository.Release.Create(owner, repo, release);
     }
 
-    public async Task AddReleaseAssetsAsync(Release release, string[] files)
+    public async Task AddReleaseAssets(Release release, string[] files)
     {
-        await Parallel.ForEachAsync(files, async (file, cancel) =>
+        Authenticate();
+
+        foreach (var file in files)
         {
+            if (!File.Exists(file))
+                throw new FileNotFoundException($"Release asset not found: {file}", file);
+
             var name = Path.GetFileName(file);
             var mime = "application/octet-stream";
             using var stream = File.OpenRead(file);
             ReleaseAssetUpload uploadData = new(name, mime, stream, null);
-            await _client.Repository.Release.UploadAsset(release, uploadData, cancel);
-        });
+            _ = await _client.Repository.Release.UploadAsset(release, uploadData);
+        }
+    }
+
+    void Authenticate()
+    {
+        if (_authenticated)
+            return;
+
+        _client.Credentials = new(GetSecret("GITHUB_TOKEN"));
+        _authenticated = true;
     }
 }

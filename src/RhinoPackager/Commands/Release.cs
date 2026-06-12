@@ -1,56 +1,39 @@
-using System.Text;
+﻿using System.Text;
 using static RhinoPackager.Util;
 
 namespace RhinoPackager.Commands;
 
-public class Release : ICommand
+public class Release(Props props, Github github, string? notesFile = null, string? message = null, string? assetsFolder = null, string[]? assetsFiles = null) : ICommand
 {
-    readonly Props _props;
-    readonly Github _github;
-    readonly string? _notesFile;
-    readonly string? _message;
-    readonly string[] _assetsFiles;
+    readonly string[] _assetsFiles = assetsFiles is not null
+            ? [.. assetsFiles.Select(f => Path.Combine(assetsFolder ?? "", f))]
+            : [];
 
-    public Release(Props props, Github github, string? notesFile = null, string? message = null, string? assetsFolder = null, string[]? assetsFiles = null)
+    public async Task Run(CommandContext context)
     {
-        _props = props;
-        _github = github;
-        _notesFile = notesFile;
-        _message = message;
-
-        _assetsFiles = assetsFiles is not null
-            ? assetsFiles
-                .Select(f => Path.Combine(assetsFolder ?? "", f))
-                .ToArray()
-            : Array.Empty<string>();
-    }
-
-    public async Task<int> RunAsync(bool publish)
-    {
-        string version = _props.GetVersion();
+        string version = props.GetVersion();
         StringBuilder body = new();
 
-        if (_notesFile is not null)
+        if (notesFile is not null)
         {
-            var notes = ReleaseNotes.GetReleaseNotes(_notesFile, version);
+            var notes = ReleaseNotes.GetReleaseNotes(notesFile, version);
 
             if (notes is not null)
-                body.AppendLine(notes);
+                _ = body.AppendLine(notes);
         }
 
-        if (_message is not null)
-            body.AppendLine(_message);
+        if (message is not null)
+            _ = body.AppendLine(message);
 
-        if (!publish)
+        if (!context.Publish)
         {
             Log("Skipping publishing Github release...");
-            return 0;
+            return;
         }
 
-        var result = await _github.AddReleaseAsync(version, body.ToString());
-        await _github.AddReleaseAssetsAsync(result, _assetsFiles);
+        var result = await github.AddRelease(version, body.ToString());
+        await github.AddReleaseAssets(result, _assetsFiles);
 
         Log($"Created release id: {result.Id}");
-        return 0;
     }
 }

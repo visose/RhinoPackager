@@ -1,1 +1,8 @@
-* text=auto
+* text=auto eol=lf
+
+*.dll binary
+*.nupkg binary
+*.pdf binary
+*.png binary
+*.yak binary
+*.zip binary

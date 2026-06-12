@@ -1,18 +1,15 @@
-using static RhinoPackager.Util;
+﻿using static RhinoPackager.Util;
 
 namespace RhinoPackager.Commands;
 
-public class Test : ICommand
+public class Test(string testProject) : ICommand
 {
-    readonly string _testProject;
-
-    public Test(string testProject) => _testProject = testProject;
-
-    public Task<int> RunAsync(bool publish)
+    public Task Run(CommandContext context)
     {
-        var result = RunDotnet("test", _testProject);
-        return Task.FromResult(result);
+        List<string> arguments = ["test", testProject];
+        AddDotnetDefaults(arguments, context);
 
-        //var result = Run("dotnet", $"test -c Release {_testProject}");
+        _ = ProcessRunner.Run("dotnet", arguments);
+        return Task.CompletedTask;
     }
 }

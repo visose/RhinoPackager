@@ -1,14 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="..\Package.props" />
+
   <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <AssemblyTitle>$(Product)</AssemblyTitle>
     <PackageId>RhinoPackager</PackageId>
+    <Copyright>Copyright (c) 2021-$(CurrentYear) $(Authors)</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="YamlDotNet" Version="13.1.1" />
+    <None Include="$(RootDir)README.md" Pack="true" PackagePath="" />
     <PackageReference Include="Octokit" Version="7.1.0" />
+    <PackageReference Include="YamlDotNet" Version="16.3.0" />
   </ItemGroup>
 
 </Project>

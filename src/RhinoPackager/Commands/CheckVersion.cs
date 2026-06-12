@@ -1,35 +1,22 @@
-using static RhinoPackager.Util;
+﻿using static RhinoPackager.Util;
 
 namespace RhinoPackager.Commands;
 
-public class CheckVersion : ICommand
+public class CheckVersion(Props props, Github github) : ICommand
 {
-    readonly Props _props;
-    readonly Github _github;
-
-    public CheckVersion(Props props, Github github)
+    public async Task Run(CommandContext context)
     {
-        _github = github;
-        _props = props;
-    }
-
-    public async Task<int> RunAsync(bool publish)
-    {
-        if (!publish)
+        if (!context.Publish)
         {
-            Log($"Skipping version check ...");
-            return 0;
+            Log("Skipping version check...");
+            return;
         }
 
-        string version = _props.GetVersion();
-        var versionExists = await _github.TagExistsAsync(version);
+        string version = props.GetVersion();
+        var versionExists = await github.TagExists(version);
 
         if (versionExists)
-        {
-            Log($"Version number {version} not updated, nothing else to do.");
-            return -1;
-        }
+            throw new InvalidOperationException($"Version number {version} already exists. Update Version before publishing.");
 
-        return 0;
     }
 }
